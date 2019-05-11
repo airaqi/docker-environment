@@ -24,9 +24,12 @@ services:
       args:
         MOSQUITTO_TAG: ${MOSQUITTO_TAG}
     container_name: Glpi-Mosquitto
+    hostname: dockerMosquitto
     volumes:
     # hold the persisted data
-    - ./docker/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+    - "./docker/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf"
+    - "/mosquitto/log/"
+    - "/mosquitto/data/"
     ports:
     - ${HOST_SERVER_MOSQUITTO_PORT}:1883
     - ${HOST_SERVER_MOSQUITTO_PORT_TLS}:8883
@@ -99,6 +102,19 @@ services:
         PMA_USER: root
         PMA_PASSWORD: docker
         PMA_HOST: glpi-dbmysql
+#  glpi-deeplink:
+#    build:
+#        context: ./docker/deeplink
+#        dockerfile: Dockerfile 
+#        args:
+#          NODE_VER: ${NODE_VER}
+#    image: glpi-deeplink
+#    container_name: Glpi-deeplink 
+#    hostname: glpideeplink
+#    links:
+#      - glpi-php:glpiphp
+#    volumes:
+#      - ./docker/deeplink/conf/config.js:/deeplink/site/config.js
 volumes:
   db-data: {}
   mosquitto: {}

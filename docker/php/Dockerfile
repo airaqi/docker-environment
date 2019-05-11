@@ -53,16 +53,23 @@ RUN apt-get install -y cron libfreetype6-dev libjpeg62-turbo-dev libmcrypt-dev \
     && docker-php-ext-install -j$(nproc) gd iconv mcrypt
 
 # Install memcached
-RUN apt-get install -y libmemcached-dev nano curl dos2unix \
+RUN apt-get install -y libmemcached-dev nano curl dos2unix  \
   && git clone https://github.com/php-memcached-dev/php-memcached /usr/src/php/ext/memcached \
   && cd /usr/src/php/ext/memcached && git checkout -b php7 origin/php7 \
   && docker-php-ext-configure memcached \
   && docker-php-ext-install memcached opcache mbstring
 
 # Install php extensions
-RUN docker-php-ext-install zip json pdo_mysql mysqli ctype fileinfo sockets bz2
+RUN apt-get install -y libc-client-dev libkrb5-dev && rm -r /var/lib/apt/lists/*
+RUN docker-php-ext-install zip json pdo_mysql mysqli ctype fileinfo sockets bz2 
 RUN ln -fs /usr/lib/x86_64-linux-gnu/libldap.so /usr/lib/
-RUN docker-php-ext-configure ldap
+RUN docker-php-ext-configure ldap --with-libdir=lib/x86_64-linux-gnu/ && \
+    docker-php-ext-install ldap
+RUN docker-php-ext-configure imap --with-kerberos --with-imap-ssl
+RUN docker-php-ext-install -j$(nproc) imap
+
+RUN apt-get  update && apt-get install -y --no-install-recommends libxml2-dev libxslt1-dev
+RUN docker-php-ext-install xml dom xmlrpc xsl
 ## APCu
 RUN yes | pecl install apcu \
     && docker-php-ext-enable apcu
